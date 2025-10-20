@@ -1,0 +1,25 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Rentals.OverdueModel
+<h2>Overdue Rentals</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Customer</th>
+            <th>Issued</th>
+            <th>Due</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var r in Model.Items)
+    {
+        <tr>
+            <td>@r.Id</td>
+            <td>@r.CustomerId</td>
+            <td>@r.IssuedAt</td>
+            <td>@r.DueDate</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,11 @@
+@page "{id:int}"
+@model PROG3340_Midterm.Web.Pages.Customers.DeleteModel
+<h2>Delete Customer</h2>
+
+<h4>Are you sure you want to delete @Model.Item?.Name (@Model.Item?.UserName)?</h4>
+
+<form method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-page="Manage" class="btn btn-secondary">Cancel</a>
+</form>

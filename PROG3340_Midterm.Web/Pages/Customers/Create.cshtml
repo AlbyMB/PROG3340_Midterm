@@ -1,0 +1,31 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Customers.CreateModel
+<h2>Create Customer</h2>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input asp-for="Item.Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input asp-for="Item.Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input asp-for="Item.UserName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input asp-for="Item.Password" type="password" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select asp-for="Item.Role" class="form-select">
+            <option>User</option>
+            <option>Admin</option>
+        </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+    <a asp-page="Manage" class="btn btn-secondary">Cancel</a>
+</form>

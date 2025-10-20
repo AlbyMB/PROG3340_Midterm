@@ -23,23 +23,16 @@ namespace PROG3340_Midterm.Controllers
 		[HttpGet]
 		public IActionResult GetAllRentals()
 		{
-			var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-			var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-			if (string.IsNullOrEmpty(userRole) || string.IsNullOrEmpty(userId))
-				return Unauthorized();
-
 			var rentals = _unitOfWork._rentalRepository.GetAll();
+			var filteredRentals = FilterRentalsByUserRole(rentals);
 			
-			if (userRole != "Admin")
-			{
-				int currentUserId = int.Parse(userId);
-				rentals = rentals.Where(r => r.CustomerId == currentUserId);
-			}
-
-			return Ok(rentals);
+			if (!filteredRentals.Any())
+				return Unauthorized();
+				
+			return Ok(filteredRentals);
 		}
 
+		[Authorize(Roles = "Admin,User")]
 		[HttpGet("{id}")]
 		public IActionResult GetRentalById(int id)
 		{
@@ -48,13 +41,33 @@ namespace PROG3340_Midterm.Controllers
 			{
 				return NotFound();
 			}
+
+			var (role, userId) = GetUserInfo();
+
+			if (role == null || userId == null)
+				return Unauthorized();
+
+			if (role == "Admin")
+				return Ok(rental);
+
+			if (rental.CustomerId != userId)
+				return NotFound();
+
 			return Ok(rental);
 		}
 
+		[Authorize(Roles = "Admin,User")]
 		[HttpPost("issue")]
 		public IActionResult IssueEquipment([FromBody] Rental rental)
 		{
 			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			var (role, userId) = GetUserInfo();
+			if (role == null || userId == null)
+				return Unauthorized();
+
+			if(rental.CustomerId != userId)
 				return BadRequest(ModelState);
 
 			var equipment = _unitOfWork._equipmentRepository.GetById(rental.EquipmentId);
@@ -73,12 +86,20 @@ namespace PROG3340_Midterm.Controllers
 			return CreatedAtAction(nameof(GetRentalById), new { id = issuedRental.Id }, issuedRental);
 		}
 
+		[Authorize(Roles = "Admin,User")]
 		[HttpPost("return")]
 		public IActionResult ReturnEquipment([FromBody] Rental rental)
 		{
 			var existingRental = _unitOfWork._rentalRepository.GetById(rental.Id);
 			if (existingRental == null)
 				return NotFound();
+
+			var (role, userId) = GetUserInfo();
+			if (role == null || userId == null)
+				return Unauthorized();
+
+			if (rental.CustomerId != userId)
+				return BadRequest(ModelState);
 
 			existingRental.ReturnedAt = DateTime.Now;
 			existingRental.ReturnCondition = rental.ReturnCondition;
@@ -89,20 +110,26 @@ namespace PROG3340_Midterm.Controllers
 			return Ok(existingRental);
 		}
 
+		[Authorize(Roles = "Admin,User")]
 		[HttpGet("active")]
 		public IActionResult GetActiveRentals()
 		{
 			var activeRentals = _unitOfWork._rentalRepository.GetActiveRentals();
-			return Ok(activeRentals);
+			var filteredRentals = FilterRentalsByUserRole(activeRentals);
+
+			return Ok(filteredRentals);
 		}
 
+		[Authorize(Roles = "Admin,User")]
 		[HttpGet("completed")]
 		public IActionResult GetCompletedRentals()
 		{
 			var completedRentals = _unitOfWork._rentalRepository.GetCompletedRentals();
-			return Ok(completedRentals);
+			var filteredRentals = FilterRentalsByUserRole(completedRentals);
+			return Ok(filteredRentals);
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpGet("overdue")]
 		public IActionResult GetOverdueRentals()
 		{
@@ -110,6 +137,7 @@ namespace PROG3340_Midterm.Controllers
 			return Ok(overdueRentals);
 		}
 
+		[Authorize(Roles = "Admin,User")]
 		[HttpGet("equipment/{equipmentId}")]
 		public IActionResult GetRentalsByEquipment(int equipmentId)
 		{
@@ -121,6 +149,7 @@ namespace PROG3340_Midterm.Controllers
 			return Ok(rentals);
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpPut("{id}")]
 		public IActionResult ExtendRental(int id, [FromBody] Rental rental)
 		{
@@ -139,6 +168,7 @@ namespace PROG3340_Midterm.Controllers
 			return Ok(updatedRental);
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpDelete("{id}")]
 		public IActionResult CancelRental(int id)
 		{
@@ -153,6 +183,31 @@ namespace PROG3340_Midterm.Controllers
 			}
 
 			return BadRequest("Failed to cancel rental");
+		}
+
+
+		private (string? role, int? userId) GetUserInfo()
+		{
+			var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+			var userIdString = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+			if (string.IsNullOrEmpty(userRole) || string.IsNullOrEmpty(userIdString))
+				return (null, null);
+
+			return (userRole, int.Parse(userIdString));
+		}
+
+		private IEnumerable<Rental> FilterRentalsByUserRole(IEnumerable<Rental> rentals)
+		{
+			var (role, userId) = GetUserInfo();
+
+			if (role == null || userId == null)
+				return Enumerable.Empty<Rental>();
+
+			if (role != "Admin")
+				return rentals.Where(r => r.CustomerId == userId);
+
+			return rentals;
 		}
 	}
 }

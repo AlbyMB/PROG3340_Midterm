@@ -29,7 +29,7 @@ namespace PROG3340_Midterm.Controllers
 				return Unauthorized("Invalid username or password.");
 			}
 			var token = GenerateToken(user);
-			return Ok(new { token });
+			return Ok(new { Token = token, Role = user.Role });
 		}
 
 		private string GenerateToken(Customer customer)

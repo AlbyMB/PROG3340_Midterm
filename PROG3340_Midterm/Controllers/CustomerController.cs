@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PROG3340_Midterm.Models;
 using PROG3340_Midterm.UnitOfWork;
+using System.Security.Claims;
 
 namespace PROG3340_Midterm.Controllers
 {
@@ -15,28 +17,42 @@ namespace PROG3340_Midterm.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        // GET: api/customers
+        
+		[Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult GetAllCustomers()
+		public IActionResult GetAllCustomers()
         {
             var customers = _unitOfWork._customerRepository.GetAll();
             return Ok(customers);
         }
 
-        // GET: api/customers/{id}
+        
+		[Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
-        public IActionResult GetCustomer(int id)
+		public IActionResult GetCustomer(int id)
         {
             var customer = _unitOfWork._customerRepository.GetByIdIncludeRentals(id);
-            if (customer == null)
+            if(customer == null)
                 return NotFound();
+
+			var (role, userId) = GetUserInfo();
+
+			if (role == null || userId == null)
+				return Unauthorized();
+
+			if (role == "Admin")
+				return Ok(customer);
+
+			if (customer.Id != userId)
+				return NotFound();
 
             return Ok(customer);
         }
 
-        // POST: api/customers
+        
+		[Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult CreateCustomer([FromBody] Customer customer)
+		public IActionResult CreateCustomer([FromBody] Customer customer)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -49,7 +65,7 @@ namespace PROG3340_Midterm.Controllers
             return CreatedAtAction(nameof(GetCustomer), new { id = newCustomer.Id }, newCustomer);
         }
 
-        // PUT: api/customers/{id}
+        
         [HttpPut("{id}")]
         public IActionResult UpdateCustomer(int id, [FromBody] Customer customer)
         {
@@ -68,9 +84,10 @@ namespace PROG3340_Midterm.Controllers
             return Ok(updatedCustomer);
         }
 
-        // DELETE: api/customers/{id}
+        
+		[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public IActionResult DeleteCustomer(int id)
+		public IActionResult DeleteCustomer(int id)
         {
             var customer = _unitOfWork._customerRepository.GetById(id);
             if (customer == null)
@@ -85,7 +102,7 @@ namespace PROG3340_Midterm.Controllers
             return BadRequest("Failed to delete customer");
         }
 
-        // GET: api/customers/{id}/rentals
+        
         [HttpGet("{id}/rentals")]
         public IActionResult GetCustomerRentals(int id)
         {
@@ -93,10 +110,21 @@ namespace PROG3340_Midterm.Controllers
             if (customer == null)
                 return NotFound();
 
-            return Ok(customer.Rentals);
+			var (role, userId) = GetUserInfo();
+
+			if (role == null || userId == null)
+				return Unauthorized();
+
+			if (role == "Admin")
+				return Ok(customer.Rentals);
+
+			if (customer.Id != userId)
+				return NotFound();
+
+			return Ok(customer.Rentals);
         }
 
-        // GET: api/customers/{id}/active-rental
+        
         [HttpGet("{id}/active-rental")]
         public IActionResult GetCustomerActiveRental(int id)
         {
@@ -104,13 +132,50 @@ namespace PROG3340_Midterm.Controllers
             if (customer == null)
                 return NotFound();
 
-            var activeRental = customer.Rentals?
+			var (role, userId) = GetUserInfo();
+
+			if (role == null || userId == null)
+				return Unauthorized();
+
+			var activeRental = customer.Rentals?
                 .FirstOrDefault(r => r.ReturnedAt == null && r.Status == "Active");
 
             if (activeRental == null)
                 return NotFound("No active rental found");
 
+			if (role == "Admin")
+				return Ok(activeRental);
+
+			if (customer.Id != userId)
+				return NotFound();
+
+
             return Ok(activeRental);
         }
-    }
+
+
+		private (string? role, int? userId) GetUserInfo()
+		{
+			var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+			var userIdString = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+			if (string.IsNullOrEmpty(userRole) || string.IsNullOrEmpty(userIdString))
+				return (null, null);
+
+			return (userRole, int.Parse(userIdString));
+		}
+
+		private IEnumerable<Rental> FilterRentalsByUserRole(IEnumerable<Rental> rentals)
+		{
+			var (role, userId) = GetUserInfo();
+
+			if (role == null || userId == null)
+				return Enumerable.Empty<Rental>();
+
+			if (role != "Admin")
+				return rentals.Where(r => r.CustomerId == userId);
+
+			return rentals;
+		}
+	}
 }

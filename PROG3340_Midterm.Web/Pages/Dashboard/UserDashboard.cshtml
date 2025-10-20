@@ -1,0 +1,13 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Dashboard.UserDashboardModel
+<h2>User Dashboard</h2>
+
+<p>Welcome, @Model.Username!</p>
+
+<ul>
+    <li><a asp-page="/Equipment/Index">Browse Equipment</a></li>
+    <li><a asp-page="/Equipment/Available">Show Available List</a></li>
+    <li><a asp-page="/Rentals/Request">Request Rental</a></li>
+    <li><a asp-page="/Rentals/My">My Rentals</a></li>
+    <li><a asp-page="/Customers/EditProfile">Update Profile</a></li>
+</ul>

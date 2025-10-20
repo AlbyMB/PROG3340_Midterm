@@ -1,0 +1,40 @@
+@page "{id:int}"
+@model PROG3340_Midterm.Web.Pages.Equipment.DetailsModel
+<h2>Equipment Details</h2>
+
+@if (Model.Item is null)
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+else
+{
+    <dl class="row">
+        <dt class="col-sm-2">Name</dt>
+        <dd class="col-sm-10">@Model.Item.Name</dd>
+        <dt class="col-sm-2">Price</dt>
+        <dd class="col-sm-10">@Model.Item.RentalPrice</dd>
+        <dt class="col-sm-2">Available</dt>
+        <dd class="col-sm-10">@Model.Item.IsAvailable</dd>
+    </dl>
+
+    <h5>Rental history</h5>
+    <ul>
+        @foreach (var r in Model.RentalHistory)
+        {
+            <li>Rental @r.Id - @r.IssuedAt:d to @r.DueDate:d - @r.Status</li>
+        }
+    </ul>
+
+    @if (Model.CanIssue)
+    {
+        <form method="post">
+            <input type="hidden" asp-for="Issue.EquipmentId" />
+            <input type="hidden" asp-for="Issue.CustomerId" />
+            <div class="mb-3">
+                <label class="form-label">Due Date</label>
+                <input asp-for="Issue.DueDate" type="date" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-success">Issue</button>
+        </form>
+    }
+}

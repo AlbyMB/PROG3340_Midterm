@@ -1,0 +1,40 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Rentals.MyModel
+<h2>My Rentals</h2>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Issued</th>
+            <th>Due</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var r in Model.Items)
+    {
+        <tr>
+            <td>@r.Id</td>
+            <td>@r.IssuedAt</td>
+            <td>@r.DueDate</td>
+            <td>@r.Status</td>
+            <td>
+                @if (r.ReturnedAt is null)
+                {
+                    <form method="post" asp-page-handler="Return" class="d-inline">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-sm btn-outline-success">Return</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

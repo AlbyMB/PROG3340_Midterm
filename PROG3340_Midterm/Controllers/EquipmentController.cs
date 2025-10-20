@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PROG3340_Midterm.Models;
 using PROG3340_Midterm.UnitOfWork;
@@ -16,23 +17,24 @@ namespace PROG3340_Midterm.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        // GET: api/equipment
+		[Authorize(Roles = "Admin,User")]
         [HttpGet]
-        public IActionResult GetAllEquipment()
+		public IActionResult GetAllEquipment()
         {
             var equipment = _unitOfWork._equipmentRepository.GetAll();
             return Ok(equipment);
         }
 
-        // GET: api/equipment/{id}
+
+		[Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
-        public IActionResult GetEquipment(int id)
+		public IActionResult GetEquipment(int id)
         {
             var equipment = _unitOfWork._equipmentRepository.GetById(id);
             if (equipment == null)
                 return NotFound();
 
-            // Get rental history for admin view
+            
             var rentalHistory = _unitOfWork._rentalRepository.GetAllByEquipmentId(id);
             var response = new
             {
@@ -43,8 +45,8 @@ namespace PROG3340_Midterm.Controllers
             return Ok(response);
         }
 
-        // POST: api/equipment
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         public IActionResult CreateEquipment([FromBody] Equipment equipment)
         {
             if (!ModelState.IsValid)
@@ -58,8 +60,9 @@ namespace PROG3340_Midterm.Controllers
             return CreatedAtAction(nameof(GetEquipment), new { id = newEquipment.Id }, newEquipment);
         }
 
-        // PUT: api/equipment/{id}
-        [HttpPut("{id}")]
+        
+		[Authorize(Roles = "Admin")]
+		[HttpPut("{id}")]
         public IActionResult UpdateEquipment(int id, [FromBody] Equipment equipment)
         {
             if (id != equipment.Id)
@@ -77,8 +80,9 @@ namespace PROG3340_Midterm.Controllers
             return Ok(updatedEquipment);
         }
 
-        // DELETE: api/equipment/{id}
-        [HttpDelete("{id}")]
+        
+		[Authorize(Roles = "Admin")]
+		[HttpDelete("{id}")]
         public IActionResult DeleteEquipment(int id)
         {
             var equipment = _unitOfWork._equipmentRepository.GetById(id);
@@ -101,16 +105,18 @@ namespace PROG3340_Midterm.Controllers
             return BadRequest("Failed to delete equipment");
         }
 
-        // GET: api/equipment/available
+
+		[Authorize(Roles = "Admin,User")]
         [HttpGet("available")]
-        public IActionResult GetAvailableEquipment()
+		public IActionResult GetAvailableEquipment()
         {
             var availableEquipment = _unitOfWork._equipmentRepository.GetAvailableEquipment();
             return Ok(availableEquipment);
         }
 
-        // GET: api/equipment/rented
-        [HttpGet("rented")]
+        
+		[Authorize(Roles = "Admin")]
+		[HttpGet("rented")]
         public IActionResult GetRentedEquipment()
         {
             var rentedEquipment = _unitOfWork._equipmentRepository.GetUnavailableEquipment();

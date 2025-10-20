@@ -1,0 +1,24 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Equipment.CreateModel
+<h2>Create Equipment</h2>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input asp-for="Item.Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Price</label>
+        <input asp-for="Item.RentalPrice" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea asp-for="Item.Description" class="form-control"></textarea>
+    </div>
+    <div class="form-check mb-3">
+        <input class="form-check-input" asp-for="Item.IsAvailable" />
+        <label class="form-check-label">Available</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+</form>

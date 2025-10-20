@@ -13,6 +13,6 @@
 		public string? Description { get; set; }
 		public bool IsAvailable { get; set; } = true;
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-		public ICollection<Rental> Rentals { get; set; }
+		public ICollection<Rental>? Rentals { get; set; }
 	}
 }

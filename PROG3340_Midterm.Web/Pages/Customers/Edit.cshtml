@@ -1,0 +1,32 @@
+@page "{id:int}"
+@model PROG3340_Midterm.Web.Pages.Customers.EditModel
+<h2>Edit Customer</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Item.Id" />
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input asp-for="Item.Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input asp-for="Item.Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input asp-for="Item.UserName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input asp-for="Item.Password" type="password" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select asp-for="Item.Role" class="form-select">
+            <option>User</option>
+            <option>Admin</option>
+        </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a asp-page="Manage" class="btn btn-secondary">Cancel</a>
+</form>

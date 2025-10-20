@@ -17,6 +17,6 @@ namespace PROG3340_Midterm.Models
 		public string Password { get; set; }    
 		[Required]
 		public string Role { get; set; }  
-		public ICollection<Rental> Rentals { get; set; }
+		public ICollection<Rental>? Rentals { get; set; }
 	}
 }

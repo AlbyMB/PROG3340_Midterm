@@ -1,0 +1,13 @@
+﻿@page
+@model AdminDashboardModel
+<h2>Admin Dashboard</h2>
+
+<p>Welcome, @Model.Username!</p>
+
+<ul>
+    <li><a asp-page="/Equipment/Index">Manage Equipment</a></li>
+    <li><a asp-page="/Equipment/Available">Available Equipment</a></li>
+    <li><a asp-page="/Customers/Manage">Manage Customers</a></li>
+    <li><a asp-page="/Rentals/Manage">Manage Rentals</a></li>
+    <li><a asp-page="/Rentals/Overdue">Overdue Rentals</a></li>
+</ul>

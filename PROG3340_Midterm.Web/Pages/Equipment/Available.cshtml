@@ -1,0 +1,31 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Equipment.AvailableModel
+<h2>Available Equipment</h2>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var e in Model.Items)
+    {
+        <tr>
+            <td>@e.Name</td>
+            <td>@e.RentalPrice</td>
+            <td>
+                <a asp-page="/Equipment/Details" asp-route-id="@e.Id">Details</a> |
+                <a asp-page="/Rentals/Request" asp-route-equipmentId="@e.Id">Request</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+ </table>

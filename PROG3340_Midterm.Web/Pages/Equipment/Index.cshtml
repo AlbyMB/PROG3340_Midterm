@@ -1,0 +1,54 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Equipment.IndexModel
+@{
+    ViewData["Title"] = "Equipment";
+}
+<h2>Equipment</h2>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Success))
+{
+    <div class="alert alert-success">@Model.Success</div>
+}
+
+<p>
+    @if (Model.IsAdmin)
+    {
+        <a asp-page="Create" class="btn btn-primary">Create</a>
+    }
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Available</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.RentalPrice</td>
+            <td>@item.IsAvailable</td>
+            <td>
+                <a asp-page="Details" asp-route-id="@item.Id">Details</a>
+                @if (Model.IsAdmin)
+                {
+                    <span> | </span>
+                    <a asp-page="Edit" asp-route-id="@item.Id">Edit</a>
+                    <span> | </span>
+                    <a asp-page="Delete" asp-route-id="@item.Id">Delete</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,23 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Customers.IndexModel
+<h2>Customers</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Role</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var c in Model.Items)
+    {
+        <tr>
+            <td>@c.Name</td>
+            <td>@c.UserName</td>
+            <td>@c.Role</td>
+        </tr>
+    }
+    </tbody>
+</table>

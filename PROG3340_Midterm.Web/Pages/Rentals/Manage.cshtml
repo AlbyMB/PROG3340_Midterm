@@ -1,0 +1,40 @@
+@page
+@model PROG3340_Midterm.Web.Pages.Rentals.ManageModel
+<h2>Manage Rentals</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Customer</th>
+            <th>Equipment</th>
+            <th>Issued</th>
+            <th>Due</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var r in Model.Items)
+    {
+        <tr>
+            <td>@r.Id</td>
+            <td>@r.CustomerId</td>
+            <td>@r.EquipmentId</td>
+            <td>@r.IssuedAt</td>
+            <td>@r.DueDate</td>
+            <td>@r.Status</td>
+            <td>
+                <form method="post" asp-page-handler="Extend" class="d-inline">
+                    <input type="hidden" name="id" value="@r.Id" />
+                    <button class="btn btn-sm btn-outline-primary">Extend</button>
+                </form>
+                <form method="post" asp-page-handler="Cancel" class="d-inline ms-1">
+                    <input type="hidden" name="id" value="@r.Id" />
+                    <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
