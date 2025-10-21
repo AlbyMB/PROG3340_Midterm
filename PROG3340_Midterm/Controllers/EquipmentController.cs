@@ -89,12 +89,10 @@ namespace PROG3340_Midterm.Controllers
             if (equipment == null)
                 return NotFound();
 
-            // Check if equipment has any active rentals
-            var activeRentals = _unitOfWork._rentalRepository.GetAllByEquipmentId(id)
-                .Any(r => r.ReturnedAt == null);
-
-            if (activeRentals)
-                return BadRequest("Cannot delete equipment with active rentals");
+            // Disallow delete if any rentals exist (active or historical) to avoid FK constraint errors
+            var hasAnyRentals = _unitOfWork._rentalRepository.GetAllByEquipmentId(id).Any();
+            if (hasAnyRentals)
+                return BadRequest("Cannot delete equipment with rental history. Remove related rentals first or deactivate equipment.");
 
             if (_unitOfWork._equipmentRepository.Delete(id))
             {

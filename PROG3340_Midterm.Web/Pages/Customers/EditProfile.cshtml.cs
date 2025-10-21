@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using PROG3340_Midterm.Web.Models;
 using PROG3340_Midterm.Web.Services;
 using System.Net.Http.Json;
 
@@ -10,7 +9,12 @@ namespace PROG3340_Midterm.Web.Pages.Customers
 	{
 		private readonly ApiClient _api;
 		[BindProperty]
-		public CustomerDto Item { get; set; } = new();
+		public string Name { get; set; } = string.Empty;
+		[BindProperty]
+		public string? Email { get; set; }
+		[BindProperty]
+		public string? Password { get; set; }
+		public string? Error { get; set; }
 
 		public EditProfileModel(ApiClient api) { _api = api; }
 
@@ -20,8 +24,9 @@ namespace PROG3340_Midterm.Web.Pages.Customers
 			if (string.IsNullOrEmpty(id)) return RedirectToPage("/Account/Login");
 			var resp = await _api.GetAsync($"Customer/{id}");
 			if (!resp.IsSuccessStatusCode) return NotFound();
-			var data = await resp.Content.ReadFromJsonAsync<CustomerDto>(new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-			Item = data ?? new();
+			var dto = await resp.Content.ReadFromJsonAsync<dynamic>();
+			Name = dto?.GetProperty("name").GetString() ?? string.Empty;
+			Email = dto?.GetProperty("email").GetString();
 			return Page();
 		}
 
@@ -29,17 +34,15 @@ namespace PROG3340_Midterm.Web.Pages.Customers
 		{
 			var id = HttpContext.Session.GetString("UserId");
 			if (string.IsNullOrEmpty(id)) return RedirectToPage("/Account/Login");
-			Item.Id = int.Parse(id);
-			var resp = await _api.PutAsync($"Customer/{id}", Item);
+			var payload = new { Name, Email, Password };
+			var resp = await _api.PatchAsync($"Customer/{id}/profile", payload);
 			if (!resp.IsSuccessStatusCode)
 			{
 				var details = await resp.Content.ReadAsStringAsync();
-				TempData["Success"] = $"Failed to save: {(int)resp.StatusCode} {resp.ReasonPhrase} {(string.IsNullOrWhiteSpace(details) ? string.Empty : "- " + details)}";
+				Error = $"Failed to save: {(int)resp.StatusCode} {resp.ReasonPhrase} {(string.IsNullOrWhiteSpace(details) ? string.Empty : "- " + details)}";
+				return Page();
 			}
-			else
-			{
-				TempData["Success"] = "Saved";
-			}
+			TempData["Success"] = "Profile saved";
 			return RedirectToPage("/Dashboard/UserDashboard");
 		}
 	}

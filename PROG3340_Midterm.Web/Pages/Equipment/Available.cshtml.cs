@@ -10,13 +10,15 @@ namespace PROG3340_Midterm.Web.Pages.Equipment
 		private readonly ApiClient _api;
 		public List<EquipmentDto> Items { get; set; } = new();
 		public string? Error { get; set; }
+		public string? Success { get; set; }
 		public AvailableModel(ApiClient api) { _api = api; }
 		public async Task OnGet()
 		{
 			var resp = await _api.GetAsync("Equipment/available");
 			if (!resp.IsSuccessStatusCode)
 			{
-				Error = $"Failed to load available: {(int)resp.StatusCode} {resp.ReasonPhrase}";
+				var details = await resp.Content.ReadAsStringAsync();
+				Error = $"Failed to load available: {(int)resp.StatusCode} {resp.ReasonPhrase} {(string.IsNullOrWhiteSpace(details) ? string.Empty : "- " + details)}";
 				return;
 			}
 			Items = await resp.Content.ReadFromJsonAsync<List<EquipmentDto>>() ?? new();

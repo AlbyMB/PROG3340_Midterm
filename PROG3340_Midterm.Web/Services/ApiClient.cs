@@ -28,7 +28,6 @@ namespace PROG3340_Midterm.Web.Services
 			return client;
 		}
 
-
 		public async Task<HttpResponseMessage> PostAsync<T>(string uri, T payload)
 		{
 			var client = CreateClient();
@@ -41,6 +40,17 @@ namespace PROG3340_Midterm.Web.Services
 			var client = CreateClient();
 			var resp = await client.PutAsJsonAsync(uri, payload);
 			return await LogAndBufferAsync(resp, uri, "PUT");
+		}
+
+		public async Task<HttpResponseMessage> PatchAsync<T>(string uri, T payload)
+		{
+			var client = CreateClient();
+			var req = new HttpRequestMessage(new HttpMethod("PATCH"), uri)
+			{
+				Content = JsonContent.Create(payload)
+			};
+			var resp = await client.SendAsync(req);
+			return await LogAndBufferAsync(resp, uri, "PATCH");
 		}
 
 		public async Task<HttpResponseMessage> GetAsync(string uri)

@@ -173,6 +173,44 @@ namespace PROG3340_Midterm.Controllers
             return Ok(activeRental);
         }
 
+        
+        [Authorize(Roles = "Admin,User")]
+        [HttpPatch("{id}/profile")]
+        public IActionResult UpdateProfile(int id, [FromBody] ProfileUpdateRequest request)
+        {
+            var existing = _unitOfWork._customerRepository.GetById(id);
+            if (existing == null)
+                return NotFound();
+
+            var (role, userId) = GetUserInfo();
+            if (role == null || userId == null)
+                return Unauthorized();
+
+            var isSelf = userId == id;
+            if (!isSelf && role != "Admin")
+                return Forbid();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Build update model preserving immutable fields
+            var update = new Customer
+            {
+                Id = existing.Id,
+                Name = request.Name,
+                Email = request.Email,
+                UserName = existing.UserName,
+                Password = string.IsNullOrWhiteSpace(request.Password) ? existing.Password : request.Password,
+                Role = existing.Role
+            };
+
+            var saved = _unitOfWork._customerRepository.Update(update);
+            if (saved == null)
+                return BadRequest("Failed to update profile");
+
+            _unitOfWork.Complete();
+            return Ok(saved);
+        }
 
 		private (string? role, int? userId) GetUserInfo()
 		{

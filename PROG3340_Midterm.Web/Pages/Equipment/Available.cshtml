@@ -6,6 +6,10 @@
 {
     <div class="alert alert-danger">@Model.Error</div>
 }
+@if (!string.IsNullOrEmpty(Model.Success))
+{
+    <div class="alert alert-success">@Model.Success</div>
+}
 
 <table class="table">
     <thead>
@@ -22,8 +26,8 @@
             <td>@e.Name</td>
             <td>@e.RentalPrice</td>
             <td>
-                <a asp-page="/Equipment/Details" asp-route-id="@e.Id">Details</a> |
-                <a asp-page="/Rentals/Request" asp-route-equipmentId="@e.Id">Request</a>
+                <a asp-page="/Equipment/Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                <a asp-page="/Rentals/Request" asp-route-equipmentId="@e.Id" class="btn btn-sm btn-primary ms-1">Request</a>
             </td>
         </tr>
     }
