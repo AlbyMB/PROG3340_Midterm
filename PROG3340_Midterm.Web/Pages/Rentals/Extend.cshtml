@@ -9,6 +9,7 @@
 
 @if (Model.Item is not null)
 {
+    var isCompleted = Model.Item.ReturnedAt != null || string.Equals(Model.Item.Status, "Completed", StringComparison.OrdinalIgnoreCase);
     <div class="card mb-3">
         <div class="card-body">
             <div><strong>Rental Id:</strong> @Model.Item.Id</div>
@@ -19,17 +20,25 @@
         </div>
     </div>
 
-    <form method="post">
-        <input type="hidden" asp-for="Item.Id" />
-        <div class="mb-3">
-            <label class="form-label">New Due Date</label>
-            <input asp-for="Item.DueDate" type="date" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Extension Reason</label>
-            <textarea asp-for="Item.ExtensionReason" class="form-control"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Extend</button>
-        <a asp-page="/Rentals/Manage" class="btn btn-secondary">Cancel</a>
-    </form>
+    @if (isCompleted)
+    {
+        <div class="alert alert-info">This rental is completed and cannot be extended.</div>
+        <a asp-page="/Rentals/Manage" class="btn btn-secondary">Back</a>
+    }
+    else
+    {
+        <form method="post">
+            <input type="hidden" asp-for="Item.Id" />
+            <div class="mb-3">
+                <label class="form-label">New Due Date</label>
+                <input asp-for="Item.DueDate" type="date" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Extension Reason</label>
+                <textarea asp-for="Item.ExtensionReason" class="form-control"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Extend</button>
+            <a asp-page="/Rentals/Manage" class="btn btn-secondary">Cancel</a>
+        </form>
+    }
 }

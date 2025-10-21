@@ -27,7 +27,12 @@ namespace PROG3340_Midterm.Web.Pages.Rentals
 			var r = await resp.Content.ReadFromJsonAsync<RentalDto>(new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 			if (r is null)
 				return NotFound();
+			// Copy fields we need for display/guarding
 			Item.Id = r.Id;
+			Item.CustomerId = r.CustomerId;
+			Item.EquipmentId = r.EquipmentId;
+			Item.Status = r.Status;
+			Item.ReturnedAt = r.ReturnedAt;
 			Item.DueDate = r.DueDate;
 			OriginalDueDate = r.DueDate;
 			return Page();
@@ -38,6 +43,12 @@ namespace PROG3340_Midterm.Web.Pages.Rentals
 			if (id != Item.Id)
 			{
 				ModelState.AddModelError(string.Empty, "ID mismatch");
+				return Page();
+			}
+			// Frontend guard: prevent posting when completed
+			if (Item.ReturnedAt != null || string.Equals(Item.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+			{
+				ModelState.AddModelError(string.Empty, "This rental is completed and cannot be extended.");
 				return Page();
 			}
 			if (!ModelState.IsValid)

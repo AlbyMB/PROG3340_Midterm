@@ -58,7 +58,11 @@ namespace PROG3340_Midterm.Repository
 
 		public IEnumerable<Rental> GetOverdueRentals()
 		{
-			return _context.Rentals.Where(r => r.DueDate < DateTime.Today).Include(r => r.Equipment).Include(r => r.Customer).ToList();
+			return _context.Rentals
+				.Where(r => r.ReturnedAt == null && r.DueDate < DateTime.Now)
+				.Include(r => r.Equipment)
+				.Include(r => r.Customer)
+				.ToList();
 		}
 
 		public Rental? Return(Rental rental)

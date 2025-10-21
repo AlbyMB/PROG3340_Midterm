@@ -17,19 +17,36 @@
     <tbody>
     @foreach (var r in Model.Items)
     {
+        var isCompleted = r.ReturnedAt != null || string.Equals(r.Status, "Completed", StringComparison.OrdinalIgnoreCase);
         <tr>
             <td>@r.Id</td>
             <td>@r.CustomerId</td>
             <td>@r.EquipmentId</td>
             <td>@r.IssuedAt</td>
             <td>@r.DueDate</td>
-            <td>@r.Status</td>
             <td>
-                <a class="btn btn-sm btn-outline-primary" asp-page="/Rentals/Extend" asp-route-id="@r.Id">Extend</a>
-                <form method="post" asp-page-handler="Cancel" class="d-inline ms-1">
-                    <input type="hidden" name="id" value="@r.Id" />
-                    <button class="btn btn-sm btn-outline-danger">Cancel</button>
-                </form>
+                @if (isCompleted)
+                {
+                    <span class="badge bg-success">Completed</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">@r.Status</span>
+                }
+            </td>
+            <td>
+                @if (!isCompleted)
+                {
+                    <a class="btn btn-sm btn-outline-primary" asp-page="/Rentals/Extend" asp-route-id="@r.Id">Extend</a>
+                    <form method="post" asp-page-handler="Cancel" class="d-inline ms-1">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                    </form>
+                }
+                else
+                {
+                    <span class="text-muted">No actions</span>
+                }
             </td>
         </tr>
     }
