@@ -8,6 +8,26 @@
         <input asp-for="Item.Name" class="form-control" />
     </div>
     <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select asp-for="Item.Category" class="form-select">
+            <option value="0">HeavyMachinery</option>
+            <option value="1">PowerTools</option>
+            <option value="2">Vehicles</option>
+            <option value="3">Safety</option>
+            <option value="4">Surveying</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Condition</label>
+        <select asp-for="Item.Condition" class="form-select">
+            <option value="0">New</option>
+            <option value="1">Excellent</option>
+            <option value="2">Good</option>
+            <option value="3">Fair</option>
+            <option value="4">Poor</option>
+        </select>
+    </div>
+    <div class="mb-3">
         <label class="form-label">Price</label>
         <input asp-for="Item.RentalPrice" class="form-control" />
     </div>

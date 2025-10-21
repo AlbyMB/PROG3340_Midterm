@@ -66,6 +66,7 @@ namespace PROG3340_Midterm.Controllers
         }
 
         
+        [Authorize(Roles = "Admin,User")]
         [HttpPut("{id}")]
         public IActionResult UpdateCustomer(int id, [FromBody] Customer customer)
         {
@@ -75,6 +76,23 @@ namespace PROG3340_Midterm.Controllers
             var existingCustomer = _unitOfWork._customerRepository.GetById(id);
             if (existingCustomer == null)
                 return NotFound();
+
+            var (role, userId) = GetUserInfo();
+            if (role == null || userId == null)
+                return Unauthorized();
+
+            // Users can only update their own profile; Admin can update any
+            var isAdmin = role == "Admin";
+            var isSelf = userId == id;
+            if (!isAdmin && !isSelf)
+                return Forbid();
+
+            // Admin cannot change another user's username or password
+            if (isAdmin && !isSelf)
+            {
+                customer.UserName = existingCustomer.UserName;
+                customer.Password = existingCustomer.Password;
+            }
 
             var updatedCustomer = _unitOfWork._customerRepository.Update(customer);
             if (updatedCustomer == null)
@@ -103,6 +121,7 @@ namespace PROG3340_Midterm.Controllers
         }
 
         
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}/rentals")]
         public IActionResult GetCustomerRentals(int id)
         {
@@ -125,6 +144,7 @@ namespace PROG3340_Midterm.Controllers
         }
 
         
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}/active-rental")]
         public IActionResult GetCustomerActiveRental(int id)
         {

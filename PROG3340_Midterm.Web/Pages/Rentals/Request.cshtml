@@ -2,6 +2,7 @@
 @model PROG3340_Midterm.Web.Pages.Rentals.RequestModel
 @{
     ViewData["Title"] = "Request Rental";
+    var userId = ViewContext.HttpContext.Session.GetString("UserId") ?? "";
 }
 <h2>Request Rental</h2>
 
@@ -13,12 +14,7 @@
 <form method="post">
     <div class="mb-3">
         <label class="form-label">Equipment</label>
-        <select asp-for="Issue.EquipmentId" class="form-select">
-            @foreach (var e in Model.Available)
-            {
-                <option value="@e.Id" selected="@(e.Id == Model.Issue.EquipmentId)">@e.Name (@e.RentalPrice.ToString("C"))</option>
-            }
-        </select>
+        <select asp-for="Issue.EquipmentId" asp-items="Model.EquipmentOptions" class="form-select"></select>
     </div>
     <div class="mb-3">
         <label class="form-label">Due date</label>
@@ -35,8 +31,9 @@
         <span class="ms-2 text-danger">@Model.Error</span>
     }
     <div asp-validation-summary="All" class="text-danger mt-2"></div>
-    <input asp-for="Issue.CustomerId" type="hidden" />
-    <input asp-for="Issue.IssuedAt" type="hidden" />
+    <!-- Explicitly include critical fields so backend gets them -->
+    <input type="hidden" name="Issue.CustomerId" value="@userId" />
+    <input type="hidden" name="Issue.IssuedAt" value="@DateTime.Now.ToString("o")" />
     <input asp-for="Issue.Status" type="hidden" />
     <input asp-for="Issue.Notes" type="hidden" />
 </form>

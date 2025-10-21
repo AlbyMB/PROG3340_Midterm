@@ -1,0 +1,45 @@
+@page "{id:int}"
+@model PROG3340_Midterm.Web.Pages.Customers.DetailsModel
+<h2>Customer Details</h2>
+
+@if (Model.Item is null)
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+else
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@Model.Item.Name (@Model.Item.UserName)</h5>
+            <p class="card-text">Email: @Model.Item.Email</p>
+            <span class="badge bg-secondary">@Model.Item.Role</span>
+        </div>
+    </div>
+
+    <h4>Rental History</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>EquipmentId</th>
+                <th>Issued</th>
+                <th>Due</th>
+                <th>Returned</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in Model.Rentals)
+        {
+            <tr>
+                <td>@r.Id</td>
+                <td>@r.EquipmentId</td>
+                <td>@r.IssuedAt</td>
+                <td>@r.DueDate</td>
+                <td>@r.ReturnedAt</td>
+                <td>@r.Status</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

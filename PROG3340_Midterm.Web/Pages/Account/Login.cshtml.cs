@@ -44,11 +44,21 @@ namespace PROG3340_Midterm.Web.Pages.Account
 				var parts = tokenResponse.Token.Split('.');
 				if (parts.Length == 3)
 				{
-					var payloadJson = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonObject>(System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(PadBase64(parts[1]))));
-					var nameId = payloadJson?["nameid"]?.ToString();
+					var payloadBytes = Convert.FromBase64String(PadBase64(parts[1]));
+					var payloadJson = System.Text.Encoding.UTF8.GetString(payloadBytes);
+					string? nameId = null;
+					using (var doc = System.Text.Json.JsonDocument.Parse(payloadJson))
+					{
+						var root = doc.RootElement;
+						if (root.TryGetProperty("nameid", out var nameIdProp))
+							nameId = nameIdProp.GetString();
+						else if (root.TryGetProperty("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", out var altProp))
+							nameId = altProp.GetString();
+					}
 					if (!string.IsNullOrWhiteSpace(nameId))
 					{
 						HttpContext.Session.SetString("UserId", nameId);
+						Console.WriteLine($"UserId extracted: {nameId}");
 					}
 				}
 			}
@@ -65,16 +75,16 @@ namespace PROG3340_Midterm.Web.Pages.Account
 			public string Role { get; set; } = "";
 		}
 
-	private static string PadBase64(string base64)
-	{
-		// JWT base64url to base64
-		base64 = base64.Replace('-', '+').Replace('_', '/');
-		switch (base64.Length % 4)
+		private static string PadBase64(string base64)
 		{
-			case 2: base64 += "=="; break;
-			case 3: base64 += "="; break;
+			// JWT base64url to base64
+			base64 = base64.Replace('-', '+').Replace('_', '/');
+			switch (base64.Length % 4)
+			{
+				case 2: base64 += "=="; break;
+				case 3: base64 += "="; break;
+			}
+			return base64;
 		}
-		return base64;
-	}
 	}
 }

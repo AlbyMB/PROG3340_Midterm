@@ -48,7 +48,10 @@ namespace PROG3340_Midterm.Repository
 			{
 				equipmentToUpdate.Name = equipment.Name;
 				equipmentToUpdate.Category = equipment.Category;
+				equipmentToUpdate.Condition = equipment.Condition;
 				equipmentToUpdate.RentalPrice = equipment.RentalPrice;
+				equipmentToUpdate.Description = equipment.Description;
+				equipmentToUpdate.IsAvailable = equipment.IsAvailable;
 				_context.Equipments.Update(equipmentToUpdate);
 				return equipmentToUpdate;
 			}

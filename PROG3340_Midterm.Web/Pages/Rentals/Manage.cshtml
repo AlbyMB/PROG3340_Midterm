@@ -25,10 +25,7 @@
             <td>@r.DueDate</td>
             <td>@r.Status</td>
             <td>
-                <form method="post" asp-page-handler="Extend" class="d-inline">
-                    <input type="hidden" name="id" value="@r.Id" />
-                    <button class="btn btn-sm btn-outline-primary">Extend</button>
-                </form>
+                <a class="btn btn-sm btn-outline-primary" asp-page="/Rentals/Extend" asp-route-id="@r.Id">Extend</a>
                 <form method="post" asp-page-handler="Cancel" class="d-inline ms-1">
                     <input type="hidden" name="id" value="@r.Id" />
                     <button class="btn btn-sm btn-outline-danger">Cancel</button>

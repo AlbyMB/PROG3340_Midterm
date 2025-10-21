@@ -1,0 +1,35 @@
+@page "{id:int}"
+@model PROG3340_Midterm.Web.Pages.Rentals.ExtendModel
+<h2>Extend Rental</h2>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+
+@if (Model.Item is not null)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <div><strong>Rental Id:</strong> @Model.Item.Id</div>
+            <div><strong>Customer:</strong> @Model.Item.CustomerId</div>
+            <div><strong>Equipment:</strong> @Model.Item.EquipmentId</div>
+            <div><strong>Current Due:</strong> @Model.Item.DueDate</div>
+            <div><strong>Status:</strong> @Model.Item.Status</div>
+        </div>
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="Item.Id" />
+        <div class="mb-3">
+            <label class="form-label">New Due Date</label>
+            <input asp-for="Item.DueDate" type="date" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Extension Reason</label>
+            <textarea asp-for="Item.ExtensionReason" class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Extend</button>
+        <a asp-page="/Rentals/Manage" class="btn btn-secondary">Cancel</a>
+    </form>
+}

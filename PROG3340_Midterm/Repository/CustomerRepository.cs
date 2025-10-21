@@ -56,6 +56,8 @@ namespace PROG3340_Midterm.Repository
 			var customerToUpdate = _context.Customers.Find(customer.Id);
 			if (customerToUpdate != null)
 			{
+				customerToUpdate.Name = customer.Name;
+				customerToUpdate.Email = customer.Email;
 				customerToUpdate.UserName = customer.UserName;
 				customerToUpdate.Password = customer.Password;
 				customerToUpdate.Role = customer.Role;

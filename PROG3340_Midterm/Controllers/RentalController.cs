@@ -25,10 +25,6 @@ namespace PROG3340_Midterm.Controllers
 		{
 			var rentals = _unitOfWork._rentalRepository.GetAll();
 			var filteredRentals = FilterRentalsByUserRole(rentals);
-			
-			if (!filteredRentals.Any())
-				return Unauthorized();
-				
 			return Ok(filteredRentals);
 		}
 
@@ -67,8 +63,9 @@ namespace PROG3340_Midterm.Controllers
 			if (role == null || userId == null)
 				return Unauthorized();
 
-			if(rental.CustomerId != userId)
-				return BadRequest(ModelState);
+			// Only enforce customer match for regular users; Admin can issue for any customer
+			if (role != "Admin" && rental.CustomerId != userId)
+				return BadRequest("CustomerId mismatch");
 
 			var equipment = _unitOfWork._equipmentRepository.GetById(rental.EquipmentId);
 			if (equipment == null)
@@ -78,9 +75,31 @@ namespace PROG3340_Midterm.Controllers
 			if (customer == null)
 				return NotFound("Customer not found");
 
+			// Business rules
+			if (!equipment.IsAvailable)
+				return BadRequest("Equipment is not available");
+
+			var existingActive = _unitOfWork._rentalRepository
+				.GetActiveRentals()
+				.Any(r => r.CustomerId == rental.CustomerId);
+			if (existingActive && role != "Admin")
+				return BadRequest("User already has an active rental");
+
+			// Defaults
+			if (rental.IssuedAt == null)
+				rental.IssuedAt = DateTime.Now;
+			if (rental.DueDate == default)
+				rental.DueDate = DateTime.Now.AddDays(7);
+			if (string.IsNullOrWhiteSpace(rental.Status))
+				rental.Status = "Active";
+
 			var issuedRental = _unitOfWork._rentalRepository.Issue(rental);
 			if (issuedRental == null)
 				return BadRequest("Failed to issue rental");
+
+			// Mark equipment unavailable
+			equipment.IsAvailable = false;
+			_unitOfWork._equipmentRepository.Update(equipment);
 
 			_unitOfWork.Complete();
 			return CreatedAtAction(nameof(GetRentalById), new { id = issuedRental.Id }, issuedRental);
@@ -98,13 +117,22 @@ namespace PROG3340_Midterm.Controllers
 			if (role == null || userId == null)
 				return Unauthorized();
 
-			if (rental.CustomerId != userId)
-				return BadRequest(ModelState);
+			// Users can only return their own; Admin can return any
+			if (role != "Admin" && existingRental.CustomerId != userId)
+				return BadRequest("CustomerId mismatch");
 
 			existingRental.ReturnedAt = DateTime.Now;
 			existingRental.ReturnCondition = rental.ReturnCondition;
 			existingRental.Status = "Completed";
 			existingRental.Notes = rental.Notes;
+
+			// Mark equipment available again
+			var equipment = _unitOfWork._equipmentRepository.GetById(existingRental.EquipmentId);
+			if (equipment != null)
+			{
+				equipment.IsAvailable = true;
+				_unitOfWork._equipmentRepository.Update(equipment);
+			}
 
 			_unitOfWork.Complete();
 			return Ok(existingRental);
